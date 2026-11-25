@@ -1,0 +1,54 @@
+
+[
+  {
+    "artist": "Demo Composer",
+    "title": "अभ्यास गीत",
+    "alternate_title": "Abhyas Geet",
+    "language": "ne",
+    "genre": "Acoustic",
+    "official_url": "",
+    "arrangement_title": "Beginner Version",
+    "original_key": "G",
+    "capo": 0,
+    "difficulty": "beginner",
+    "strumming_pattern": "D-DU-UDU",
+    "chord_content": "[G]नयाँ बिहान [D]संगीतसँग\n[Em]साना पाइला [C]अगाडि बढ्छन्",
+    "arranged_by": "Demo Contributor",
+    "source_url": "",
+    "source_notes": "Original demonstration words and arrangement created for importer testing."
+  },
+  {
+    "artist": "Demo Composer",
+    "title": "अभ्यास गीत",
+    "alternate_title": "Abhyas Geet",
+    "language": "ne",
+    "genre": "Acoustic",
+    "official_url": "",
+    "arrangement_title": "Alternative Version",
+    "original_key": "C",
+    "capo": 0,
+    "difficulty": "intermediate",
+    "strumming_pattern": "D-DU-U-DU",
+    "chord_content": "[C]नयाँ बिहान [G]संगीतसँग\n[Am]साना पाइला [F]अगाडि बढ्छन्",
+    "arranged_by": "Demo Contributor",
+    "source_url": "",
+    "source_notes": "Original demonstration content for testing an alternate chord arrangement."
+  },
+  {
+    "artist": "Demo Composer",
+    "title": "Practice Melody",
+    "alternate_title": "",
+    "language": "hi",
+    "genre": "Acoustic",
+    "official_url": "",
+    "arrangement_title": "Standard",
+    "original_key": "C",
+    "capo": 0,
+    "difficulty": "beginner",
+    "strumming_pattern": "D-DU-UDU",
+    "chord_content": "[C]नया दिन [G]संगीत के साथ\n[Am]धीरे धीरे [F]आगे बढ़ें",
+    "arranged_by": "Demo Contributor",
+    "source_url": "",
+    "source_notes": "Original demonstration Hindi practice lines created for testing."
+  }
+]

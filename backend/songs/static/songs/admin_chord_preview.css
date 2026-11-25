@@ -1,0 +1,108 @@
+
+.gc-preview-section {
+  margin-top: 18px;
+  padding: 20px;
+
+  border: 1px solid #e5e2da;
+  border-radius: 12px;
+
+  background: #faf9f5;
+  color: #242925;
+}
+
+.gc-preview-section h3 {
+  margin: 0 0 8px;
+
+  font-size: 16px;
+  font-weight: 700;
+  color: #242925;
+}
+
+.gc-preview-description {
+  margin-bottom: 20px;
+
+  color: #70736e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gc-preview-content {
+  min-height: 100px;
+  max-height: 520px;
+
+  overflow: auto;
+
+  padding: 20px;
+  border: 1px solid #e9e5dd;
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.gc-preview-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  margin-bottom: 12px;
+  min-height: 38px;
+}
+
+.gc-preview-line.gc-preview-blank {
+  min-height: 16px;
+  margin-bottom: 8px;
+}
+
+.gc-preview-segment {
+  display: inline-flex;
+  flex-direction: column;
+
+  max-width: 100%;
+  vertical-align: bottom;
+}
+
+.gc-preview-chord {
+  min-height: 21px;
+
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #b76b4e;
+}
+
+.gc-preview-lyrics {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  font-family:
+    "Noto Sans Devanagari",
+    "Nirmala UI",
+    sans-serif;
+
+  font-size: 16px;
+  line-height: 1.7;
+
+  color: #242925;
+}
+
+.gc-preview-empty {
+  margin: 0;
+
+  color: #70736e;
+  font-size: 13px;
+}
+
+@media (max-width: 767px) {
+  .gc-preview-section {
+    padding: 12px;
+  }
+
+  .gc-preview-content {
+    padding: 12px;
+  }
+
+  .gc-preview-lyrics {
+    font-size: 15px;
+  }
+}
