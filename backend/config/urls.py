@@ -1,6 +1,8 @@
 
 from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 from rest_framework.decorators import (
     api_view,
@@ -16,16 +18,25 @@ from drf_spectacular.views import (
 )
 
 
+@extend_schema(
+    responses=inline_serializer(
+        name="HealthCheckResponse",
+        fields={
+            "status": serializers.CharField(),
+            "service": serializers.CharField(),
+            "version": serializers.CharField(),
+        },
+    ),
+    tags=["Health"],
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def health_check(request):
-
     return Response({
         "status": "ok",
         "service": "Guitar Chords API",
         "version": "1.0.0",
     })
-
 
 urlpatterns = [
     path("admin/", admin.site.urls),

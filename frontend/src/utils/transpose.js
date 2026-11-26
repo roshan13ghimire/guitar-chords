@@ -100,7 +100,7 @@ export function transposeChordPro(
   if (semitones === 0) return content
 
   return content.replace(
-    /\[([^\[\]\n]+)\]/g,
+    /\[([^ [\]\n]+)\]/g,
     (_, chord) =>
       `[${transposeChord(
         chord.trim(),
@@ -112,7 +112,7 @@ export function transposeChordPro(
 
 export function extractChordNames(content = '') {
   const matches = [
-    ...content.matchAll(/\[([^\[\]\n]+)\]/g),
+    ...content.matchAll(/\[([^ [\]\n]+)\]/g),
   ]
 
   return [

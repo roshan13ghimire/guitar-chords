@@ -19,7 +19,7 @@ export function normalizeChord(chord) {
 
 export function parseChordLine(line) {
   const segments = []
-  const pattern = /\[([^\[\]\n]+)\]/g
+  const pattern = /\[([^ [\]\n]+)\]/g
 
   let cursor = 0
   let currentChord = ''

@@ -24,6 +24,37 @@ ALLOWED_HOSTS = env.list(
     default=["localhost", "127.0.0.1"],
 )
 
+# Production security
+
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=[],
+)
+
+SECURE_SSL_REDIRECT = env.bool(
+    "SECURE_SSL_REDIRECT",
+    default=not DEBUG,
+)
+
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_SECURE = not DEBUG
+
+SECURE_HSTS_SECONDS = 0 if DEBUG else 3600
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+
+SECURE_HSTS_PRELOAD = False
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+X_FRAME_OPTIONS = "DENY"
+
+if env.bool("TRUST_PROXY", default=False):
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https",
+    )
 
 # Applications
 
@@ -89,6 +120,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # PostgreSQL database
 
+# PostgreSQL database
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -97,6 +130,21 @@ DATABASES = {
         "PASSWORD": env("DB_PASSWORD"),
         "HOST": env("DB_HOST", default="localhost"),
         "PORT": env("DB_PORT", default="5432"),
+        "CONN_MAX_AGE": env.int(
+            "DB_CONN_MAX_AGE",
+            default=0,
+        ),
+        "CONN_HEALTH_CHECKS": True,
+        "OPTIONS": {
+    "sslmode": env(
+        "DB_SSLMODE",
+        default="prefer" if DEBUG else "require",
+    ),
+    "channel_binding": env(
+        "DB_CHANNEL_BINDING",
+        default="prefer",
+    ),
+},
     }
 }
 
