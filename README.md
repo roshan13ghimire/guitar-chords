@@ -67,9 +67,6 @@ Built with React, Django REST Framework, and PostgreSQL.
 
 ![Dark Mode](docs/screenshots/dark-mode.png)
 
-### Mobile View
-
-<img src="docs/screenshots/mobile-view.png" width="320" alt="Mobile View">
 
 
 ## Technology Stack
