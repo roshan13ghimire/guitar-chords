@@ -48,6 +48,30 @@ Built with React, Django REST Framework, and PostgreSQL.
 - OpenAPI documentation
 - Automated visibility tests
 
+
+## Screenshots
+
+### Song Catalogue
+
+![Song Catalogue](docs/screenshots/homepage.png)
+
+### Song Details
+
+![Song Details](docs/screenshots/song-details.png)
+
+### Guitar Chord Library
+
+![Chord Library](docs/screenshots/chord-library.png)
+
+### Dark Mode
+
+![Dark Mode](docs/screenshots/dark-mode.png)
+
+### Mobile View
+
+<img src="docs/screenshots/mobile-view.png" width="320" alt="Mobile View">
+
+
 ## Technology Stack
 
 | Layer | Technologies |
