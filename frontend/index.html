@@ -1,13 +1,54 @@
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+      name="description"
+      content="A personal guitar songbook for Nepali, Hindi and English songs. Browse songs, practice guitar chords and learn chord shapes."
+    />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+    />
+
+    <title>Guitar Chords — A personal songbook</title>
+
+    <script>
+      (function () {
+        let savedTheme
+
+        try {
+          savedTheme = localStorage.getItem(
+            'guitar-chords-theme'
+          )
+        } catch {}
+
+        const theme =
+          savedTheme === 'light' || savedTheme === 'dark'
+            ? savedTheme
+            : window.matchMedia(
+                '(prefers-color-scheme: dark)'
+              ).matches
+              ? 'dark'
+              : 'light'
+
+        document.documentElement.dataset.theme = theme
+      })()
+    </script>
   </head>
+
   <body>
     <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

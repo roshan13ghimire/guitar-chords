@@ -1,17 +1,37 @@
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
 .venv/
-.env
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Django
-*.sqlite3
+db.sqlite3
 staticfiles/
 media/
+*.log
 
-# Frontend
+# React / Node
 node_modules/
 dist/
+dist-ssr/
+.vite/
+coverage/
 
-# IDE
+# IDE and operating system
 .vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Private song collections
+private_songs/

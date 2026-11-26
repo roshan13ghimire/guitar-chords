@@ -1,69 +1,187 @@
 
-@import "@fontsource-variable/dm-sans";
-@import "@fontsource/noto-sans-devanagari/400.css";
-@import "@fontsource/noto-sans-devanagari/600.css";
 @import "tailwindcss";
 
-/* Tailwind CSS v4 Design System */
-@theme {
-  --font-sans: "DM Sans Variable", "Noto Sans Devanagari", sans-serif;
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-  /* Backgrounds */
-  --color-paper: #f7f6f2;
-  --color-night: #242925;
+@theme inline {
+  --font-sans: "Inter", "Noto Sans Devanagari", sans-serif;
+  --font-mono: "JetBrains Mono", "Noto Sans Devanagari", monospace;
 
-  /* Text */
-  --color-ink: #242925;
-  --color-muted: #666963;
-
-  /* Brand */
-  --color-copper: #98543d;
-  --color-copper-light: #f3e8e1;
-
-  /* Borders */
-  --color-line: #e9e5dd;
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
 }
 
-/* Global Styles */
 :root {
-  font-family: var(--font-sans);
-  color: var(--color-ink);
-  background-color: var(--color-paper);
+  color-scheme: light;
 
+  --background: #f7f6f2;
+  --surface: #ffffff;
+  --surface-hover: #eeefe9;
+  --foreground: #242724;
+  --muted: #686f66;
+  --line: #dedfd8;
+  --accent: #426b57;
+  --accent-soft: #e6ede6;
+  --danger: #b34444;
+
+  font-family: "Inter", "Noto Sans Devanagari", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #181b19;
+  --surface: #202421;
+  --surface-hover: #292e2a;
+  --foreground: #e8eae5;
+  --muted: #a2aba1;
+  --line: #343a35;
+  --accent: #9bbda5;
+  --accent-soft: #293b30;
+  --danger: #eb9999;
 }
 
 html {
-  scroll-behavior: smooth;
+  min-width: 320px;
+  scroll-behavior: auto;
 }
 
 body {
-  min-width: 320px;
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+#root {
+  min-height: 100vh;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
-button {
+button:not(:disabled) {
   cursor: pointer;
 }
 
-::selection {
-  background: #ead0c2;
-  color: #242925;
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+a,
+button,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}
+
+.site-container {
+  width: min(100% - 2rem, 880px);
+  margin-inline: auto;
+}
+
+.reader-container {
+  width: min(100% - 2rem, 760px);
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .site-container {
+    width: min(100% - 4rem, 880px);
+  }
+
+  .reader-container {
+    width: min(100% - 4rem, 760px);
   }
 }
-/* Distraction-free guitar practice */
-body.practice-focus-mode .site-header {
-  display: none;
+
+/* Guitar chord sheet */
+
+.chord-sheet {
+  font-family:
+    "JetBrains Mono",
+    "Noto Sans Devanagari",
+    monospace;
+
+  line-height: 1.6;
+}
+
+.chord-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 0.9em;
+}
+
+.chord-segment {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chord-name {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9em;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.chord-lyrics {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+  line-height: 1.7;
+}
+/* Interactive chord names */
+
+button.chord-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.9em;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.chord-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.chord-link:focus-visible {
+  outline-offset: 2px;
+  border-radius: 2px;
 }

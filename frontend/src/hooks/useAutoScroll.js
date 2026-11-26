@@ -1,72 +1,204 @@
-import { useEffect, useRef } from "react";
 
-export default function useAutoScroll({ playing, speed, targetRef, onStop }) {
-  const onStopRef = useRef(onStop);
+import { useEffect, useState } from 'react'
+
+const MIN_SPEED = 1
+const MAX_SPEED = 10
+
+function getInitialSpeed() {
+  try {
+    const saved = Number(
+      localStorage.getItem('guitar-chords-scroll-speed')
+    )
+
+    if (
+      Number.isInteger(saved) &&
+      saved >= MIN_SPEED &&
+      saved <= MAX_SPEED
+    ) {
+      return saved
+    }
+  } catch {
+    // Use default speed.
+  }
+
+  return 3
+}
+
+export default function useAutoScroll() {
+  const [playing, setPlaying] = useState(false)
+  const [speed, setSpeed] = useState(getInitialSpeed)
 
   useEffect(() => {
-    onStopRef.current = onStop;
-  }, [onStop]);
+    try {
+      localStorage.setItem(
+        'guitar-chords-scroll-speed',
+        String(speed)
+      )
+    } catch {
+      // Storage is optional.
+    }
+  }, [speed])
 
   useEffect(() => {
-    if (!playing) return;
+    if (!playing) return
 
-    let frameId;
-    let previousTime;
-    let position = window.scrollY;
+    let frameId
+    let lastTime = null
+    let remainder = 0
 
-    const stop = () => onStopRef.current?.();
+    const pixelsPerSecond = speed * 10
 
-    const handleKeyDown = (event) => {
+    function stop() {
+      setPlaying(false)
+    }
+
+    function scrollFrame(timestamp) {
+      if (lastTime === null) {
+        lastTime = timestamp
+      }
+
+      const elapsed = Math.min(
+        (timestamp - lastTime) / 1000,
+        0.1
+      )
+
+      lastTime = timestamp
+
+      const maxScroll = Math.max(
+        0,
+        document.documentElement.scrollHeight -
+          window.innerHeight
+      )
+
+      if (window.scrollY >= maxScroll - 1) {
+        stop()
+        return
+      }
+
+      remainder += pixelsPerSecond * elapsed
+
+      const distance = Math.floor(remainder)
+
+      if (distance > 0) {
+        window.scrollBy(0, distance)
+        remainder -= distance
+      }
+
+      frameId = requestAnimationFrame(scrollFrame)
+    }
+
+    function handleKeyDown(event) {
+      const target = event.target
+
       if (
-        ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]
-          .includes(event.key)
+        ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']
+          .includes(target?.tagName) ||
+        target?.isContentEditable
       ) {
-        stop();
-      }
-    };
-
-    const handleVisibility = () => {
-      if (document.hidden) stop();
-    };
-
-    const animate = (timestamp) => {
-      if (previousTime !== undefined) {
-        const delta = Math.min((timestamp - previousTime) / 1000, 0.1);
-        const maximum = Math.max(
-          0,
-          document.documentElement.scrollHeight - window.innerHeight
-        );
-
-        // Stop once the last chord line is comfortably visible, not after the footer.
-        const sheetBottom = targetRef.current?.getBoundingClientRect().bottom;
-        if (
-          (sheetBottom !== undefined && sheetBottom <= window.innerHeight * 0.7) ||
-          window.scrollY >= maximum - 1
-        ) {
-          stop();
-          return;
-        }
-
-        position = Math.min(maximum, Math.max(position, window.scrollY) + speed * delta);
-        window.scrollTo(0, position);
+        return
       }
 
-      previousTime = timestamp;
-      frameId = window.requestAnimationFrame(animate);
-    };
+      const scrollKeys = [
+        'ArrowUp',
+        'ArrowDown',
+        'PageUp',
+        'PageDown',
+        'Home',
+        'End',
+        ' ',
+      ]
 
-    window.addEventListener("wheel", stop, { passive: true });
-    window.addEventListener("touchstart", stop, { passive: true });
-    window.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("visibilitychange", handleVisibility);
-    frameId = window.requestAnimationFrame(animate);
+      if (scrollKeys.includes(event.key)) {
+        stop()
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        stop()
+      }
+    }
+
+    window.addEventListener(
+      'wheel',
+      stop,
+      { passive: true }
+    )
+
+    window.addEventListener(
+      'touchmove',
+      stop,
+      { passive: true }
+    )
+
+    window.addEventListener(
+      'keydown',
+      handleKeyDown
+    )
+
+    document.addEventListener(
+      'visibilitychange',
+      handleVisibilityChange
+    )
+
+    frameId = requestAnimationFrame(scrollFrame)
 
     return () => {
-      window.cancelAnimationFrame(frameId);
-      window.removeEventListener("wheel", stop);
-      window.removeEventListener("touchstart", stop);
-      window.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [playing, speed, targetRef]);
+      cancelAnimationFrame(frameId)
+
+      window.removeEventListener('wheel', stop)
+      window.removeEventListener('touchmove', stop)
+
+      window.removeEventListener(
+        'keydown',
+        handleKeyDown
+      )
+
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibilityChange
+      )
+    }
+  }, [playing, speed])
+
+  function toggle() {
+    setPlaying(current => !current)
+  }
+
+  function pause() {
+    setPlaying(false)
+  }
+
+  function restart() {
+    setPlaying(false)
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant',
+    })
+  }
+
+  function increaseSpeed() {
+    setSpeed(current =>
+      Math.min(MAX_SPEED, current + 1)
+    )
+  }
+
+  function decreaseSpeed() {
+    setSpeed(current =>
+      Math.max(MIN_SPEED, current - 1)
+    )
+  }
+
+  return {
+    playing,
+    speed,
+    toggle,
+    pause,
+    restart,
+    increaseSpeed,
+    decreaseSpeed,
+    minSpeed: MIN_SPEED,
+    maxSpeed: MAX_SPEED,
+  }
 }

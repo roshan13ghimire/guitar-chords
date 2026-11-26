@@ -1,228 +1,145 @@
 
-from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase
 
-from .models import (
-    Artist,
-    Song,
-    ChordArrangement,
+from songs.services.chordpro import (
+    ChordProParseError,
+    extract_chords,
+    parse_chordpro,
 )
 
 
-class PublicSongAPITests(TestCase):
+class ChordProParserTests(SimpleTestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.artist = Artist.objects.create(
-            name="Demo Artist"
-        )
+    def test_extract_unique_chords(self):
 
-        cls.song = Song.objects.create(
-            title="Guitar Practice Song",
-            alternate_title="Practice Geet",
-            artist=cls.artist,
-            language="ne",
-        )
-
-        cls.published_arrangement = (
-            ChordArrangement.objects.create(
-                song=cls.song,
-                title="Beginner Version",
-                original_key="G",
-                chord_content="[G]Original practice line",
-                arranged_by="Demo Contributor",
-                source_notes=(
-                    "Original words and chord arrangement "
-                    "created specifically for testing."
-                ),
-                rights_basis=(
-                    ChordArrangement.RightsBasis.ORIGINAL
-                ),
-                publication_status=(
-                    ChordArrangement.PublicationStatus.PUBLISHED
-                ),
-                is_verified=True,
-            )
-        )
-
-        ChordArrangement.objects.create(
-            song=cls.song,
-            title="Unpublished Version",
-            original_key="D",
-            chord_content="[D]Private draft",
-            publication_status=(
-                ChordArrangement.PublicationStatus.DRAFT
-            ),
-            is_verified=False,
-        )
-
-        cls.draft_song = Song.objects.create(
-            title="Hidden Song",
-            artist=cls.artist,
-            language="hi",
-        )
-
-        ChordArrangement.objects.create(
-            song=cls.draft_song,
-            title="Draft",
-            original_key="C",
-            chord_content="[C]Not published",
-            publication_status=(
-                ChordArrangement.PublicationStatus.DRAFT
-            ),
-            is_verified=False,
-        )
-
-    def test_public_song_list(self):
-        response = self.client.get("/api/songs/")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
-
-    def test_only_published_arrangements_visible(self):
-        response = self.client.get(
-            f"/api/songs/{self.song.id}/"
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        arrangements = response.json()["arrangements"]
-
-        self.assertEqual(len(arrangements), 1)
+        content = "[G]Hello [D]world [G]again"
 
         self.assertEqual(
-            arrangements[0]["title"],
-            "Beginner Version",
+            extract_chords(content),
+            ["D", "G"],
         )
 
-    def test_draft_song_hidden(self):
-        response = self.client.get(
-            f"/api/songs/{self.draft_song.id}/"
+    def test_normalize_sharp_and_flat_symbols(self):
+
+        content = "[F♯m]Hello [B♭]world"
+
+        self.assertEqual(
+            extract_chords(content),
+            ["Bb", "F#m"],
         )
 
-        self.assertEqual(response.status_code, 404)
+    def test_parse_valid_song(self):
 
-    def test_language_filter(self):
-        response = self.client.get(
-            "/api/songs/?language=ne"
-        )
+        content = """
+{title: Test Song}
+{artist: Test Artist}
+{language: Nepali}
+{key: G}
+{capo: 2}
+[G]Hello [D]world
+"""
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
+        song = parse_chordpro(content)
 
-    def test_alternate_title_search(self):
-        response = self.client.get(
-            "/api/songs/?search=Geet"
-        )
+        self.assertEqual(song.title, "Test Song")
+        self.assertEqual(song.artist, "Test Artist")
+        self.assertEqual(song.language, "ne")
+        self.assertEqual(song.musical_key, "G")
+        self.assertEqual(song.capo, 2)
+        self.assertEqual(song.chords, ["D", "G"])
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
+    def test_missing_title(self):
 
-    def test_public_cannot_create_song(self):
-        response = self.client.post(
-            "/api/songs/",
-            {"title": "Unauthorized Song"},
-        )
+        content = """
+{artist: Test Artist}
+{language: English}
+[G]Hello world
+"""
 
-        self.assertEqual(response.status_code, 405)
+        with self.assertRaises(ChordProParseError):
+            parse_chordpro(content)
 
-    def test_publishing_requires_rights_review(self):
-        arrangement = ChordArrangement(
-            song=self.song,
-            title="Uncleared Version",
-            original_key="G",
-            chord_content="[G]Test",
-            source_notes="Source recorded.",
-            is_verified=True,
-            publication_status=(
-                ChordArrangement.PublicationStatus.PUBLISHED
-            ),
-            rights_basis=(
-                ChordArrangement.RightsBasis.UNKNOWN
-            ),
-        )
+    def test_missing_artist(self):
 
-        with self.assertRaises(ValidationError) as error:
-            arrangement.full_clean()
+        content = """
+{title: Test Song}
+{language: English}
+[G]Hello world
+"""
+
+        with self.assertRaises(ChordProParseError):
+            parse_chordpro(content)
+
+    def test_invalid_language(self):
+
+        content = """
+{title: Test Song}
+{artist: Test Artist}
+{language: Invalid}
+[G]Hello world
+"""
+
+        with self.assertRaises(ChordProParseError):
+            parse_chordpro(content)
+
+    def test_invalid_capo(self):
+
+        content = """
+{title: Test Song}
+{artist: Test Artist}
+{language: English}
+{capo: 15}
+[G]Hello world
+"""
+
+        with self.assertRaises(ChordProParseError):
+            parse_chordpro(content)
+
+    def test_missing_chords(self):
+
+        content = """
+{title: Test Song}
+{artist: Test Artist}
+{language: English}
+Hello world
+"""
+
+        with self.assertRaises(ChordProParseError):
+            parse_chordpro(content)
+
+    def test_unicode_content(self):
+
+        content = """
+{title: सानो सपना}
+{artist: Test Artist}
+{language: Nepali}
+[G]सानो सपना [D]मनमा
+"""
+
+        song = parse_chordpro(content)
+
+        self.assertEqual(song.title, "सानो सपना")
+        self.assertIn("मनमा", song.content)
+
+    def test_preserve_section_directives(self):
+
+        content = """
+{title: Test Song}
+{artist: Test Artist}
+{language: English}
+{start_of_verse}
+[G]Hello world
+{end_of_verse}
+"""
+
+        song = parse_chordpro(content)
 
         self.assertIn(
-            "rights_basis",
-            error.exception.message_dict,
+            "{start_of_verse}",
+            song.content,
         )
-
-    def test_publishing_requires_verification(self):
-        arrangement = ChordArrangement(
-            song=self.song,
-            title="Unverified Version",
-            original_key="G",
-            chord_content="[G]Test",
-            source_notes="Entire content is original.",
-            is_verified=False,
-            publication_status=(
-                ChordArrangement.PublicationStatus.PUBLISHED
-            ),
-            rights_basis=(
-                ChordArrangement.RightsBasis.ORIGINAL
-            ),
-        )
-
-        with self.assertRaises(ValidationError) as error:
-            arrangement.full_clean()
 
         self.assertIn(
-            "is_verified",
-            error.exception.message_dict,
+            "{end_of_verse}",
+            song.content,
         )
-
-    def test_publishing_requires_source_notes(self):
-        arrangement = ChordArrangement(
-            song=self.song,
-            title="Missing Source Notes",
-            original_key="G",
-            chord_content="[G]Test",
-            source_notes="",
-            is_verified=True,
-            publication_status=(
-                ChordArrangement.PublicationStatus.PUBLISHED
-            ),
-            rights_basis=(
-                ChordArrangement.RightsBasis.ORIGINAL
-            ),
-        )
-
-        with self.assertRaises(ValidationError) as error:
-            arrangement.full_clean()
-
-        self.assertIn(
-            "source_notes",
-            error.exception.message_dict,
-        )
-
-    def test_public_api_rejects_invalid_published_record(self):
-        unsafe_song = Song.objects.create(
-            title="Unreviewed Published Song",
-            artist=self.artist,
-            language="en",
-        )
-
-        # Direct ORM creation intentionally bypasses
-        # model-form validation for this regression test.
-        ChordArrangement.objects.create(
-            song=unsafe_song,
-            title="Unsafe Version",
-            original_key="C",
-            chord_content="[C]Private content",
-            publication_status=(
-                ChordArrangement.PublicationStatus.PUBLISHED
-            ),
-            rights_basis=(
-                ChordArrangement.RightsBasis.UNKNOWN
-            ),
-            is_verified=True,
-        )
-
-        response = self.client.get(
-            f"/api/songs/{unsafe_song.id}/"
-        )
-
-        self.assertEqual(response.status_code, 404)
